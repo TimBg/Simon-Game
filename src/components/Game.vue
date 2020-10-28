@@ -29,7 +29,7 @@
     </div>
     <div class="game-info">
       <h2>Раунд: {{ round }}</h2>
-      <button @click="start">Старт</button>
+      <button @click="init">Старт</button>
     </div>
     <div class="game-options">
       <h2>Опции:</h2>
@@ -50,35 +50,35 @@ export default {
     level: 1500,
     round: undefined,
     isWin: undefined,
-    on: true,
     isSuccessStep: undefined,
     idOfInterval: undefined,
     isStrict: true,
     isUpdateOneOfColors: undefined,
     numOfStep: undefined,
+    buttonsIsActive: true,
     sound: true,
-    flash: undefined,
+    switchingOnСounter: undefined,
     red: "darkred",
     blue: "darkblue",
     green: "darkgreen",
     yellow: "goldenrod",
-    redSound: new Audio("/sounds/1.mp3"),
-    blueSound: new Audio("/sounds/2.mp3"),
-    greenSound: new Audio("/sounds/3.mp3"),
-    yellowSound: new Audio("/sounds/4.mp3"),
+    redSound: new Audio(require("@/assets/sounds/1.mp3")),
+    blueSound: new Audio(require("@/assets/sounds/2.mp3")),
+    greenSound: new Audio(require("@/assets/sounds/3.mp3")),
+    yellowSound: new Audio(require("@/assets/sounds/4.mp3")),
   }),
   methods: {
-    start() {
-      (this.on || this.isWin) && this.play();
+    init() {
+      (this.buttonsIsActive || this.isWin) && this.start();
     },
-    play() {
+    start() {
       this.gameSteps = [];
       this.userSteps = [];
       this.isWin = false;
       this.isSuccessStep = true;
       this.idOfInterval = 0;
-      this.on = true;
-      this.flash = 0;
+      this.buttonsIsActive = true;
+      this.switchingOnСounter = 0;
       this.numOfStep = 1;
       this.round = 1;
       for (let i = 0; i < 20; i++) {
@@ -94,21 +94,31 @@ export default {
       this.yellow = "goldenrod";
     },
     goToNextArea() {
-      this.on = false;
-      if (this.flash === this.numOfStep) {
+      this.buttonsIsActive = false;
+      if (this.switchingOnСounter === this.numOfStep) {
         clearInterval(this.idOfInterval);
         this.isUpdateOneOfColors = false;
         this.backToDefaultColors();
-        this.on = true;
+        this.buttonsIsActive = true;
       }
       if (this.isUpdateOneOfColors) {
         this.backToDefaultColors();
         setTimeout(() => {
-          if (this.gameSteps[this.flash] === 1) this.updateBlue();
-          if (this.gameSteps[this.flash] === 2) this.updateRed();
-          if (this.gameSteps[this.flash] === 3) this.updateYellow();
-          if (this.gameSteps[this.flash] === 4) this.updateGreen();
-          this.flash++;
+          switch (this.gameSteps[this.switchingOnСounter]) {
+            case 1:
+              this.updateBlue();
+              break;
+            case 2:
+              this.updateRed();
+              break;
+            case 3:
+              this.updateYellow();
+              break;
+            case 4:
+              this.updateGreen();
+              break;
+          }
+          this.switchingOnСounter++;
         }, 200);
       }
     },
@@ -158,10 +168,10 @@ export default {
           this.round = this.numOfStep;
           this.backToDefaultColors();
           if (this.isStrict) {
-            this.play();
+            this.start();
           } else {
             this.isUpdateOneOfColors = true;
-            this.flash = 0;
+            this.switchingOnСounter = 0;
             this.userSteps = [];
             this.isSuccessStep = true;
             this.idOfInterval = setInterval(this.goToNextArea, this.level);
@@ -177,13 +187,13 @@ export default {
         this.numOfStep++;
         this.userSteps = [];
         this.isUpdateOneOfColors = true;
-        this.flash = 0;
+        this.switchingOnСounter = 0;
         this.round = this.numOfStep;
         this.idOfInterval = setInterval(this.goToNextArea, this.level);
       }
     },
     clickOnRedArea() {
-      if (this.on) {
+      if (this.buttonsIsActive) {
         this.userSteps.push(2);
         this.checkСorrectness();
         this.updateRed();
@@ -195,7 +205,7 @@ export default {
       }
     },
     clickOnBlueArea() {
-      if (this.on) {
+      if (this.buttonsIsActive) {
         this.userSteps.push(1);
         this.checkСorrectness();
         this.updateBlue();
@@ -207,7 +217,7 @@ export default {
       }
     },
     clickOnGreenArea() {
-      if (this.on) {
+      if (this.buttonsIsActive) {
         this.userSteps.push(4);
         this.checkСorrectness();
         this.updateGreen();
@@ -219,7 +229,7 @@ export default {
       }
     },
     clickOnYellowArea() {
-      if (this.on) {
+      if (this.buttonsIsActive) {
         this.userSteps.push(3);
         this.checkСorrectness();
         this.updateYellow();
